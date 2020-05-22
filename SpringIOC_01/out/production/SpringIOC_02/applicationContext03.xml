@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <!--  实验13：基于XML的自动装配  -->
+<!--    <bean id="car01" class="com.atguigu.bean.Car">
+        <property name="carName" value="宝马"/>
+        <property name="price" value="88888888"/>
+        <property name="color" value="红色"/>
+    </bean>-->
+
+    <bean id="car" class="com.atguigu.bean.Car">
+        <property name="carName" value="宝马2"/>
+        <property name="price" value="88888888"/>
+        <property name="color" value="红色"/>
+    </bean>
+    <!-- 为Person里面的自定义类型的属性赋值
+            property: 手动赋值
+            自动赋值（自动装配）：
+
+         autowire="default/no" : 不自动装配：不自动为car属性赋值
+
+         // 按照某种规则自动装配
+         autowire="byName" : 按照名字
+                     private Car car;
+                        以属性名作为id去容器中找到一个组件，给他赋值；如果找不到就装配null
+                        ioc.getBean("car");
+
+         autowire="byType"
+                     private Car car;
+                        1). 以属性的类型作为查找依据去容器中找到这个组件，如果容器中有多个这种类型的组件，报错:
+org.springframework.beans.factory.UnsatisfiedDependencyException:
+Error creating bean with name 'person' defined in class path resource [applicationContext03.xml]:
+Unsatisfied dependency expressed through bean property 'car': :
+No qualifying bean of type [com.atguigu.bean.Car] is defined: expected single matching bean but found 2: car01,car02;
+nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException:
+No qualifying bean of type [com.atguigu.bean.Car] is defined: expected single matching bean but found 2: car01,car02
+                        2). 没找到呢？就装配null
+                        ioc.getBean(Car.class);
+
+         autowire="constructor" : 按照构造器赋值
+                            public Person(Car car)
+                            1). 先按照有参构造器的参数类型进行装配(byType),没有就直接为组件装配null；
+                            2). 如果按照类型找到了多个：参数名作为id继续匹配，找到就装配，找不到就装配null.
+                            3). 不会报错
+
+         自动的为属性赋值：
+
+     -->
+    <bean id="person" class="com.atguigu.bean.Person" autowire="byType">
+        <!--<property name="car" ref="car"/>-->
+    </bean>
+
+    <bean id = "book01" class="com.atguigu.bean.Book">
+        <property name="author" value="吴承恩"></property>
+        <property name="bookName" value="西游记"></property>
+    </bean>
+    <bean id = "book02" class="com.atguigu.bean.Book">
+        <property name="author" value="吴承恩2"></property>
+        <property name="bookName" value="西游记"></property>
+    </bean>
+
+    <!--
+      实验14：[SpEL测试I] (Spring Expression Language)
+    在SpEL中使用字面量、
+    引用其他bean、
+    引用其他bean的某个属性值、
+    调用非静态方法
+    调用静态方法、
+    使用运算符
+    -->
+    <bean id="person04" class="com.atguigu.bean.Person">
+        <!-- 字面量：${}; #{} -->
+        <property name="age" value="#{21*2}"/>
+        <property name="salary" value="#{1213456.43*1}"/>
+        <property name="lastName" value="#{book01.bookName}"/>
+        <property name="car" value="#{car}"/>
+        <!--
+            调用静态方法
+            UUID.randomUUID().toString()
+                #{T(全类名).静态方法名(1,2)}
+         -->
+        <property name="email" value="#{T(java.util.UUID).randomUUID().toString().substring(0,5)}"/>
+
+        <!-- 调用非静态方法: 对象的方法名 -->
+        <property name="gender" value="#{book01.getBookName()}"/>
+    </bean>
+
+
+
+</beans>

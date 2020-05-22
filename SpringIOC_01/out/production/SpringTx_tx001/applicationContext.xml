@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <!--  实验23：测试泛型依赖注入★  -->
+    <context:component-scan base-package="com.atguigu" />
+
+    <context:property-placeholder location="classpath:dbconfig.properties"/>
+    <!-- ${key}动态取出配置文件中某个key对应的值,为了防止配置文件中的key和spring中的关键字冲突，可以给key取名时加一个前缀 -->
+    <bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="pooledDataSource"/>
+    </bean>
+
+    <!-- 具有具名参数的jdbcTemplate -->
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg ref="pooledDataSource" name="dataSource"></constructor-arg>
+    </bean>
+
+    <!-- 事务控制 -->
+    <!-- 1:配置事务管理器(切面)让其进行事务控制，一定导入面向切面编程的几个包 -->
+    <bean id="transactionMananger" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 控制住数据源-->
+        <property name="dataSource" ref="pooledDataSource"/>
+    </bean>
+    <!-- 2:开启基于注解的事务控制模式：依赖tx名称空间 -->
+    <tx:annotation-driven transaction-manager="transactionMananger"/>
+    <!-- 3:给事务方法加注解@Transactional -->
+</beans>

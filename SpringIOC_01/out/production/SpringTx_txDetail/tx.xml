@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <!-- 扫描包 -->
+    <context:component-scan base-package="com.atguigu"/>
+
+    <!-- 0. 引入外部配置文件 -->
+    <context:property-placeholder location="classpath:dbconfig.properties"/>
+
+    <!-- 1. 配置数据源 -->
+    <bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${jdbc.username}"/>
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+    </bean>
+
+    <!-- 2. 配置jdbcTemplate操作数据库 -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="pooledDataSource"/>
+    </bean>
+
+    <!-- 3. 配置声明式事务
+            1). Spring中提供事务管理器（事务切面），配置这个事务管理器
+            2). 开启基于注解的声明式事务：依赖tx名称空间
+     -->
+    <bean id="transactionalManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="pooledDataSource"/>
+    </bean>
+
+    <!-- 开启事务管理 -->
+    <tx:annotation-driven transaction-manager="transactionalManager"/>
+</beans>
