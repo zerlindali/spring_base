@@ -20,7 +20,7 @@ public class BookService {
      * @param username
      * @param isbn
      */
-//    @Transactional
+    @Transactional
     public void checkOut(String username, String isbn){
         int price = bookDao.getPrice(isbn);
         // 减库存
