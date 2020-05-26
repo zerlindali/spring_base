@@ -2,10 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <!-- 扫描包 -->
     <context:component-scan base-package="com.atguigu"/>
@@ -29,11 +30,36 @@ http://www.springframework.org/schema/tx  http://www.springframework.org/schema/
     <!-- 3. 配置声明式事务
             1). Spring中提供事务管理器（事务切面），配置这个事务管理器
             2). 开启基于注解的声明式事务：依赖tx名称空间
+            3). 给事务方法加注解
      -->
     <bean id="transactionalManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="pooledDataSource"/>
     </bean>
 
-    <!-- 开启事务管理 -->
-    <tx:annotation-driven transaction-manager="transactionalManager"/>
+    <!--
+        基于XML配置的事务
+        1). Spring中提供事务管理器（事务切面），配置这个事务管理器
+        2). 配置出事务方法；
+        3). 告诉Spring哪些方法是事务方法：（事务切面按照我们的切入点表达式去切入事务方法）
+    -->
+    <bean id="bookService" class="com.atguigu.service.BookService"></bean>
+
+    <aop:config>
+        <aop:pointcut id="txPoint" expression="execution(* com.atguigu.service.*.*(..))"/>
+        <!-- 事务建议：事务增强 advice-ref：指向事务管理器的配置-->
+        <aop:advisor advice-ref="myAdvice" pointcut-ref="txPoint"/>
+    </aop:config>
+
+    <!-- 配置事务管理器 -->
+    <tx:advice id="myAdvice" transaction-manager="transactionalManager">
+        <!-- 事务属性 -->
+        <tx:attributes>
+            <!-- 指明哪些方法是事务方法：切入点表达式只是说，事务管理器要切入这些方法，哪些方法加事务使用tx:method -->
+            <tx:method name="*" propagation="REQUIRES_NEW"/>
+            <tx:method name="checkout" propagation="REQUIRES_NEW" />
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 配置和注解用哪个：都用，重要的用配置，不重要的用注解 -->
 </beans>

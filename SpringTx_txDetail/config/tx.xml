@@ -29,6 +29,7 @@ http://www.springframework.org/schema/tx  http://www.springframework.org/schema/
     <!-- 3. 配置声明式事务
             1). Spring中提供事务管理器（事务切面），配置这个事务管理器
             2). 开启基于注解的声明式事务：依赖tx名称空间
+            3). 给事务的方法加注解
      -->
     <bean id="transactionalManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="pooledDataSource"/>

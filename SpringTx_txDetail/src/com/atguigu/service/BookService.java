@@ -141,6 +141,7 @@ public class BookService {
     /**
      *
      */
+    @Transactional
     public void mulTx(){
         checkOut7("Tom", "ISBN-001");
 
